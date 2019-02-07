@@ -20,51 +20,51 @@ interface MyState {
 class Teachers extends Component<MyProps, MyState> {
   constructor(props: any) {
     super(props);
-    const NAME = this.getData()
-    console.log(NAME)
+
+    this.onInputChange = this.onInputChange.bind(this)
     this.state = {
       id: 0,
       name: '',
-      salary: 0,
+      salary: this.getData().salary,
       percentLessThanYear: 0,
       percentMoreThanYear: 0,
       amountLessThanYear: 0,
       amountMoreThanYear: 0,
       summary: 0
     }
-
-    this.onInputChange = this.onInputChange.bind(this)
   }
-
+   db = firebase.firestore();
+   
   getData() {
-    const db = firebase.firestore();
-    const settings = { timestampsInSnapshots: true };
-    db.settings(settings);
-     db.collection('teachers').doc("LA").set({
-
-     }).then( () => {
-
+    let data
+    this.db.collection('teachers').doc('LA')
+    .onSnapshot(function(doc) {
+        console.log("Current data: ", doc.data());
+        data = doc.data()
     });
+    return data
   }
-  onInputChange(event: any) {
-    const id = event.target.id;
-    const value = event.target.value;
-    this.setState({ [id]: value } as MyState);
-  }
-
+ 
   setTeacher = (event: any) => {
     const db = firebase.firestore();
-    db.settings({
+    this.db.settings({
       timestampsInSnapshots: true
     });
-    const userRef = db.collection('teachers').add({
+    const userRef = db.collection('teachers').doc('LA').set({
       name: this.state.name,
       salary: this.state.salary
     });
   }
 
-  render() {
+  onInputChange(event: any) {
+    const id = event.target.id;
+    const value = event.target.value;
+    console.log(`${id} ${value}`)
+    this.setState({ [id]: value } as MyState);
+  }
 
+  render() {
+    this.getData()
     return (
       <Paper>
         <form onSubmit={this.setTeacher}>
